@@ -13,7 +13,7 @@ const runner = require('./test-runner.js');
 
 const app = express();
 const server = http.createServer(app);
-const io = require ("socket.io")(3000);
+const io = socket(httpserver);
 
 app.use('/public', express.static(process.cwd() + '/public'));
 app.use('/assets', express.static(process.cwd() + '/assets'));
