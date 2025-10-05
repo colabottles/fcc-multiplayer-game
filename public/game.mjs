@@ -1,6 +1,6 @@
 import Player from './Player.mjs';
 import Collectible from './Collectible.mjs';
 
-const socket = require('socket.io')(http);
+const passportSocketIo = require(‘passport.socketio’)
 const canvas = document.getElementById('game-window');
 const context = canvas.getContext('2d');
