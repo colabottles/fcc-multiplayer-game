@@ -1,49 +1,58 @@
 class Player {
-  constructor({x, y, score, id}) {
-    this.x = x
-    this.y = y
-    this.score = score
-    this.id = id
-  }
+  	constructor({x = 320, y = 240, size=15, score=0, id} = {}) {
 
-  movePlayer(dir, speed) {
-    if(dir == 'right') this.x = this.x + speed
-    if(dir == 'left') this.x = this.x - speed
-    if(dir == 'down') this.y = this.x + speed
-    if(dir == 'up') this.y = this.x - speed
-    
-  }
+	  	this.x = x;
+	  	this.y = y
+	  	this.score = score;
+	  	this.id = id
+		this.size
+  	}
 
-  collision(item) {
-    let collision_range = 10;
-    let x_Range = Math.abs(this.x - item.x)
-    let y_Range = Math.abs(this.y - item.y)
-    if(x_Range <= collision_range &&  y_Range <= collision_range) return true
+  	movePlayer(dir, speed) {
 
-    return false
+		if (dir === 'up') {
+			this.y -= speed;
+		}
+		if (dir === 'down') {
+			this.y += speed;
+		}
+		if (dir === 'left') {
+			this.x -= speed;
+		}
+		if (dir === 'right') {
+			this.x += speed;
+		}
+  	}
 
-  }
+  	collision(item) {
+		const playerRadius = 15
+		const collectibleRadius = 7;
 
-  calculateRank(arr) {
-    let Player1=arr[0]
-    let Player2=arr[1]
-    // console.log(arr)
-    // Sort the player array by player.SCORE. find the position this player is.
-    arr.sort(function(a, b){return b.score - a.score}); // Decending order by score
-    // console.log(arr)
-    let currentPlayerRank = arr.findIndex(player => {
-      // console.log(`${player.id} === ${this.id}`)
-      // console.log(`${player.id === this.id}`)
-      return player.id === this.id
-    })
-    currentPlayerRank += 1;  // index 0 -> Rank 1
-    // console.log(currentPlayerRank)
-    // console.log(arr.length)
-    
-    // console.log(`Rank: ${currentPlayerRank} / ${arr.length}`)
-    return `Rank: ${currentPlayerRank} / ${arr.length}`
-    
-  }
+		const dx = this.x - item.x;
+		const dy = this.y - item.y;
+		const distance = Math.sqrt(dx * dx + dy * dy);
+
+		if (distance < playerRadius + collectibleRadius) {
+			this.score += item.value;
+			return true
+		}
+		return false
+  	}
+
+  	calculateRank(arr) {
+		let currentRanking = 1;
+		let totalPlayers = 0;
+
+	  	for (let player=0; player < arr.length; player ++){
+			if (arr[player].id === this.id) {
+				continue
+			}
+			if (arr[player].score > this.score) {
+				currentRanking += 1;
+			}
+		}
+		return `Rank: ${currentRanking}/${arr.length}`
+  	}
 }
 
 export default Player;
