@@ -12,18 +12,13 @@
     <link rel="stylesheet" href="../public/style.css" type="text/css" />
     <link href="https://fonts.googleapis.com/css?family=Press+Start+2P&display=swap" rel="stylesheet">
     <script src="/socket.io/socket.io.js"></script>
-    <style>
-        body { margin: 0; overflow: hidden; display: flex; font-family: sans-serif; }
-        #gameCanvas { border: 1px solid black; }
-        #scoreboard { width: 200px; padding: 10px; border-left: 1px solid black; }
-        .rank-item { margin-bottom: 5px; }
-    </style>
   </head>
   <body>
     <header>
       <h1>Secure Real Time Multiplayer Game</h1>
     </header>
-    <main class="container">
+    <hr style="margin: 25px" />
+    <div class="container">
       <canvas 
         ref="game"
         id="game-window" 
@@ -31,14 +26,7 @@
         height="480"
       >
       </canvas>
-
-      <section id="scoreboard">
-          <h2>Rankings</h2>
-          <aside id="rankList"></aside>
-      </section>
-    </main>
+    </div>
   </body>
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="client.js"></script>
   <script src="../public/game.mjs" type="module"></script>
 </html>

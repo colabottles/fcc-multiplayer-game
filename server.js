@@ -7,8 +7,25 @@ const cors = require('cors');
 
 const fccTestingRoutes = require('./routes/fcctesting.js');
 const runner = require('./test-runner.js');
+const helmet = require('helmet')
+const noCache = require('nocache')
 
 const app = express();
+
+
+// helmet protection!
+app.use(helmet({        //  https://helmetjs.github.io/
+  "X-Content-Type-Options": "noSniff",
+  "X-XSS-Protection": 0, 
+  noCache : true,
+}));
+// app.use(noCache()) * new, but could not pass test.
+
+app.use((req, res, next) => {
+  res.header('x-powered-by','PHP 7.4.3')
+  next();
+}); // as nonsense as security measure 
+
 
 app.use('/public', express.static(process.cwd() + '/public'));
 app.use('/assets', express.static(process.cwd() + '/assets'));
@@ -34,6 +51,9 @@ app.use(function(req, res, next) {
     .type('text')
     .send('Not Found');
 });
+
+
+
 
 const portNum = process.env.PORT || 3000;
 

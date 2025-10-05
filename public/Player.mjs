@@ -1,64 +1,49 @@
-import { dimension } from './dimension.mjs';
-
 class Player {
-  constructor({x, y, score, id, radius = 30}) {
-    this.x = x;
-    this.y = y;
-    this.score = score;
-    this.id = id;
-    // hitbox
-    this.radius = radius;
-    
+  constructor({x, y, score, id}) {
+    this.x = x
+    this.y = y
+    this.score = score
+    this.id = id
   }
 
   movePlayer(dir, speed) {
-    switch(dir) {
-      case 'up':
-        this.y  = Math.max(dimension.minY+this.radius, this.y - speed);
-        break;
-      case 'down':
-        this.y  = Math.min(dimension.maxY-this.radius, this.y + speed);
-        break;
-      case 'left':
-        this.x  = Math.max(dimension.minX+this.radius, this.x - speed);
-        break;
-      case 'right':
-        this.x  = Math.min(dimension.maxX-this.radius, this.x + speed);
-        break;
-    }
+    if(dir == 'right') this.x = this.x + speed
+    if(dir == 'left') this.x = this.x - speed
+    if(dir == 'down') this.y = this.x + speed
+    if(dir == 'up') this.y = this.x - speed
+    
   }
 
   collision(item) {
-    var dx = this.x - item.x;
-    var dy = this.y - item.y;
-    var distance = Math.sqrt(dx * dx + dy * dy);
-    if (distance < this.radius + item.radius) {
-      return true;
-    }
-    return false;
-  }
+    let collision_range = 10;
+    let x_Range = Math.abs(this.x - item.x)
+    let y_Range = Math.abs(this.y - item.y)
+    if(x_Range <= collision_range &&  y_Range <= collision_range) return true
 
-  draw(context,img){
-    // show the hitbox
-    /*context.beginPath();
-    context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-    context.stroke();*/
-    context.drawImage(img, this.x-this.radius, this.y-this.radius, 2*this.radius, 2*this.radius);
+    return false
+
   }
 
   calculateRank(arr) {
-    const sort = arr.sort((a, b) => b.score - a.score);
-    let position = 0
-    sort.forEach((player, index) => {
-      if(this.id === player.id) position = index+1;
-    });
-
-    return `Rank: ${position} / ${arr.length}`;
+    let Player1=arr[0]
+    let Player2=arr[1]
+    // console.log(arr)
+    // Sort the player array by player.SCORE. find the position this player is.
+    arr.sort(function(a, b){return b.score - a.score}); // Decending order by score
+    // console.log(arr)
+    let currentPlayerRank = arr.findIndex(player => {
+      // console.log(`${player.id} === ${this.id}`)
+      // console.log(`${player.id === this.id}`)
+      return player.id === this.id
+    })
+    currentPlayerRank += 1;  // index 0 -> Rank 1
+    // console.log(currentPlayerRank)
+    // console.log(arr.length)
+    
+    // console.log(`Rank: ${currentPlayerRank} / ${arr.length}`)
+    return `Rank: ${currentPlayerRank} / ${arr.length}`
+    
   }
-
 }
-try {
-  module.exports = Player;
-} catch(e) {}
 
 export default Player;
