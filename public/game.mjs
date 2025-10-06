@@ -1,166 +1,131 @@
 import Player from './Player.mjs';
 import Collectible from './Collectible.mjs';
-
+import { dimension } from './dimension.mjs';
 const socket = io();
+
+
+let tick;
+let playersList = [];
+let oxygenEntity;
+let playerEntity;
+let spikeEntity;
+
+
 const canvas = document.getElementById('game-window');
-const ctx = canvas.getContext('2d');
-
-let keys = {};
-
-window.addEventListener('keydown', (event) => {
-	keys[event.key] = true;
-});
-
-window.addEventListener('keyup', (event) => {
-	keys[event.key] = false;
-});
-
-let player, collectible
-socket.on('connect', () => {
-	player = new Player({ x: 320, y: 240, score:0, id: socket.id })
-	socket.emit('newPlayer', player);
-
-	console.log('Player created')
-
-	socket.emit('requestCollectible')
-
-	update()
-})
-
-socket.on('newCollectible', (item) => {
-	if (!collectible) {
-		collectible = new Collectible(item.x, item.y)
-	} else {
-		collectible.x = item.x;
-		collectible.y = item.y;
-	}
-});
-
-let otherPlayers = []
-
-socket.on('updatePlayers', (players) => {
-	otherPlayers = players;
-})
+const context = canvas.getContext('2d');
 
 
+let meImage = new Image();
+let otherImage = new Image();
+let oxygenImage = new Image();
+let spikeImage = new Image();
 
-function drawSmileyFace(x, y, color, radius = 15) {
+const init = () => {
+  // get images
+  meImage.src = 'public/img/green.png';
+  otherImage.src = 'public/img/white.png';
+  oxygenImage.src = 'public/img/oxygen.png';
+  spikeImage.src = 'public/img/spikedball.png';
+  
+  // create user
+  socket.on('init', ({ id, players, oxygen, spike }) => {
+    console.log(id, players,oxygen,spike);
+    oxygenEntity = new Collectible(oxygen);
+    playerEntity = players.filter(x => x.id === id)[0];
+    playerEntity = new Player(playerEntity);
+    spikeEntity = new Player(spike);
+  
+    playersList = players
 
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, Math.PI * 2);
-    ctx.fill();
-	ctx.strokeStyle = 'black';
-    ctx.stroke(); 
 
-    // Draw left eye
-    ctx.fillStyle = "black";
-    ctx.beginPath();
-    ctx.arc(x - radius / 3, y - radius / 3, radius / 6, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Draw right eye
-    ctx.beginPath();
-    ctx.arc(x + radius / 3, y - radius / 3, radius / 6, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Draw smile
-    ctx.beginPath();
-    ctx.arc(x, y + radius / 6, radius / 2, 0, Math.PI);
-    ctx.stroke();
+    document.onkeydown = e => {
+      let  dir = null
+      switch(e.keyCode) {
+        case 87:
+        case 38:
+           dir = 'up';
+           break;
+        case 83:
+        case 40:
+           dir = 'down';
+           break;
+        case 65:
+        case 37:
+           dir = 'left';
+           break;
+        case 68:
+        case 39:
+           dir = 'right';
+           break;   
+      }
+      if (dir) {
+        playerEntity.movePlayer(dir, 10);
+        socket.emit('update', playerEntity);
+      }
+    }
+  
+    // update
+    socket.on('update', ({players:players,spike:spike,oxygen:oxygen,player:player}) => {
+      spikeEntity = new Player(spike)
+      playersList = players;
+      oxygenEntity = new Collectible(oxygen)
+      if (player) {
+        if (player.id === playerEntity.id) {
+          playerEntity= new Player(player);
+        }
+      }
+      
+    });
+  
+  });
+  
+  window.requestAnimationFrame(update); 
 }
 
-function draw() {
-	if (!player) {
-		return
-	}
+const update = () => {
 
-	//background
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	ctx.fillStyle = '#232323';
-	ctx.fillRect(0, 0, canvas.width, canvas.height);
+  context.clearRect(0, 0, canvas.width, canvas.height);
 
-	//outside rectangle
-	ctx.strokeStyle = '#a1a1a1';
-	ctx.lineWidth = 2;
-	ctx.strokeRect(5, 50, canvas.width - 10, canvas.height - 55);
+  // Set background color
+  context.fillStyle = '#1c4966';
+  context.fillRect(0, 0, canvas.width, canvas.height);
 
-	//header
-	ctx.font = '20px Monospace';
-	ctx.fillStyle = 'white';
+  // Create border for play field
+  context.strokeStyle = '#45b6fe';
+  context.strokeRect(dimension.minX, dimension.minY, dimension.arenaSizeX, dimension.arenaSizeY);
 
-	const padding = 10
+  // Controls text
+  context.fillStyle = '#45b6fe';
+  context.font = `13px 'Press Start 2P'`;
+  context.textAlign = 'center';
+  context.fillText('Controls', 80, 20);
+  context.textAlign = 'center';
+  context.fillText('WASD', 80, 40);
 
-	ctx.textAlign = 'left';
-	ctx.fillText(`Controls: WASD`, padding, 30)
+  // Game title
+  context.font = `40px 'Modak'`;
+  context.fillText('Bubble survivor', 300, 40);
 
-	ctx.textAlign = 'center';
-	ctx.fillText('Coin Race', canvas.width / 2, 30);
+  if (playerEntity) {
+    playerEntity.draw(context,meImage);
+    context.font = `26px 'Modak'`;
+    context.fillText(playerEntity.calculateRank(playersList), 560, 40);
+    playersList.forEach((player)=> {
+       if (player.id !== playerEntity.id) {
+         let p = new Player(player);
+         p.draw(context, otherImage);
+       }
+    });
+    if (oxygenEntity) {
+      oxygenEntity.draw(context,oxygenImage);
+    }
+    if (spikeEntity) {
+      spikeEntity.draw(context,spikeImage);
+    }
+  }
 
-	ctx.textAlign = 'right';
-	ctx.fillText(player.calculateRank(otherPlayers), canvas.width - padding, 30)
-
-	//collectible
-	if (collectible) {
-		ctx.strokeStyle = '#FFD700'
-		ctx.beginPath();
-		ctx.arc(collectible.x, collectible.y, 7, 0, Math.PI * 2); 
-		ctx.fillStyle = "#FFD700";
-		ctx.fill();
-	}
-
-	//player
-	drawSmileyFace(player.x, player.y, 'yellow');
-
-	//other players
-	otherPlayers.forEach(otherPlayer => {
-		if (otherPlayer.id !== player.id) {
-			drawSmileyFace(otherPlayer.x, otherPlayer.y, 'red');
-		}
-	})
-
-	//score
-	ctx.font = '15px Monospace';
-	ctx.fillStyle = 'white';
-	ctx.fillText(`Score: ${player.score}`, canvas.width - padding, 67);
+ 
+  tick = requestAnimationFrame(update);
 }
 
-
-function update() {
-	if (!player || !collectible) {
-		requestAnimationFrame(update);
-		return
-	}
-	let moved = false 
-	const speed = 5
-
-	if ((keys['ArrowUp'] || keys['w']) && (player.y > 65)) {
-		player.movePlayer('up', speed);
-		moved = true;
-	}
-	if ((keys['ArrowDown'] || keys['s']) && (player.y < canvas.height - 20)) {
-		player.movePlayer('down', speed);
-		moved = true;
-	}
-	if ((keys['ArrowLeft'] || keys['a']) && player.x > 20) {
-		player.movePlayer('left', speed);
-		moved = true;
-	}
-	if ((keys['ArrowRight'] || keys['d']) && player.x < canvas.width - 20) {
-		player.movePlayer('right', speed);
-		moved = true;
-	}
-
-	let collision = player.collision(collectible);
-
-	if (collision || moved) {
-		socket.emit('updatePlayer', player);
-		if (collision) {
-			socket.emit('updateCollectible');
-		}
-	}
-
-	draw();
-
-	requestAnimationFrame(update);
-}
+init();

@@ -1,58 +1,64 @@
+import { dimension } from './dimension.mjs';
+
 class Player {
-  	constructor({x = 320, y = 240, size=15, score=0, id} = {}) {
+  constructor({x, y, score, id, radius = 30}) {
+    this.x = x;
+    this.y = y;
+    this.score = score;
+    this.id = id;
+    // hitbox
+    this.radius = radius;
+    
+  }
 
-	  	this.x = x;
-	  	this.y = y
-	  	this.score = score;
-	  	this.id = id
-		this.size
-  	}
+  movePlayer(dir, speed) {
+    switch(dir) {
+      case 'up':
+        this.y  = Math.max(dimension.minY+this.radius, this.y - speed);
+        break;
+      case 'down':
+        this.y  = Math.min(dimension.maxY-this.radius, this.y + speed);
+        break;
+      case 'left':
+        this.x  = Math.max(dimension.minX+this.radius, this.x - speed);
+        break;
+      case 'right':
+        this.x  = Math.min(dimension.maxX-this.radius, this.x + speed);
+        break;
+    }
+  }
 
-  	movePlayer(dir, speed) {
+  collision(item) {
+    var dx = this.x - item.x;
+    var dy = this.y - item.y;
+    var distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance < this.radius + item.radius) {
+      return true;
+    }
+    return false;
+  }
 
-		if (dir === 'up') {
-			this.y -= speed;
-		}
-		if (dir === 'down') {
-			this.y += speed;
-		}
-		if (dir === 'left') {
-			this.x -= speed;
-		}
-		if (dir === 'right') {
-			this.x += speed;
-		}
-  	}
+  draw(context,img){
+    // show the hitbox
+    /*context.beginPath();
+    context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+    context.stroke();*/
+    context.drawImage(img, this.x-this.radius, this.y-this.radius, 2*this.radius, 2*this.radius);
+  }
 
-  	collision(item) {
-		const playerRadius = 15
-		const collectibleRadius = 7;
+  calculateRank(arr) {
+    const sort = arr.sort((a, b) => b.score - a.score);
+    let position = 0
+    sort.forEach((player, index) => {
+      if(this.id === player.id) position = index+1;
+    });
 
-		const dx = this.x - item.x;
-		const dy = this.y - item.y;
-		const distance = Math.sqrt(dx * dx + dy * dy);
+    return `Rank: ${position} / ${arr.length}`;
+  }
 
-		if (distance < playerRadius + collectibleRadius) {
-			this.score += item.value;
-			return true
-		}
-		return false
-  	}
-
-  	calculateRank(arr) {
-		let currentRanking = 1;
-		let totalPlayers = 0;
-
-	  	for (let player=0; player < arr.length; player ++){
-			if (arr[player].id === this.id) {
-				continue
-			}
-			if (arr[player].score > this.score) {
-				currentRanking += 1;
-			}
-		}
-		return `Rank: ${currentRanking}/${arr.length}`
-  	}
 }
+try {
+  module.exports = Player;
+} catch(e) {}
 
 export default Player;

@@ -1,31 +1,18 @@
 class Collectible {
-	constructor({x, y, value=1, id=1} = {}) {
-
-		if (!x && !y) {
-			this.reset()
-		} else {
-			this.x = x
-			this.y = y
-		}
-
-		this.value = value
-		this.id = id
-
-  	}
-
-	reset() {
-		const padding = 5;
-		const gameArea = {
-	    	x: 5,
-		    y: 50,
-			width: 640 - 10,
-		    height: 480 - 55
-		};
-		
-
-		this.x = Math.floor(Math.random() * (gameArea.width - padding * 2)) + gameArea.x + padding;
-	  this.y = Math.floor(Math.random() * (gameArea.height - padding * 2)) + gameArea.y + padding;
-	}
+  constructor({x, y, value, id}) {
+    this.x = x;
+    this.y = y;
+    this.value = value;
+    this.id = id;
+    this.radius = 20
+  }
+  
+  draw(context,img) {
+    /*context.beginPath();
+    context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+    context.stroke();*/
+    context.drawImage(img, this.x-this.radius, this.y-this.radius, 2*this.radius, 2*this.radius);
+  }
 
 }
 

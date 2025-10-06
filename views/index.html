@@ -1,32 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>Secure Real-Time Multiplayer Game</title>
-    <meta
-      name="description"
-      content="An example for the fCC InfoSec Secure Real-Time Multiplayer Game project"
-    />
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="../public/style.css" type="text/css" />
-    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
-  </head>
-  <body>
-    <header>
-      <h1>Secure Real Time Multiplayer Game</h1>
-    </header>
-    <hr style="margin: 25px" />
-    <div class="container">
-      <canvas 
-        ref="game"
-        id="game-window" 
-        width="640" 
-        height="480"
-      >
-      </canvas>
+<head>
+    <meta charset="UTF-8">
+    <title>Secure 2D Multiplayer Game</title>
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            display: flex; 
+            font-family: sans-serif; 
+            background-color: #f4f4f4;
+        }
+        #gameCanvas { 
+            border: 2px solid #333; 
+            background-color: #fff; 
+            margin: 20px;
+        }
+        #scoreboard { 
+            width: 250px; 
+            padding: 20px; 
+            margin: 20px 0; 
+            background-color: #eee;
+            border: 1px solid #ccc;
+        }
+        .rank-item { 
+            margin-bottom: 8px; 
+            padding: 5px; 
+            border-bottom: 1px dashed #ccc;
+        }
+        .self-rank {
+            font-weight: bold;
+            background-color: #e0f7fa; /* Light cyan background for self */
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="scoreboard">
+        <h2>Player Rankings</h2>
+        <div id="rankList"></div>
     </div>
-  </body>
-  <script src="../public/game.mjs" type="module"></script>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="client.js"></script>
+</body>
 </html>
